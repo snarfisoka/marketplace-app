@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  db:
+    build: ./database
+    container_name: marketplace_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_password}
+      POSTGRES_DB: ${POSTGRES_DB:-marketplace_db}
+
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - marketplace-network
+
+  redis:
+    build: ./redis
+    container_name: marketplace_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - marketplace-network
+
+  user-api:
+    build: ./user-app
+    container_name: marketplace_user_api
+    restart: always
+
+    depends_on:
+      - db
+      - redis
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_password}
+      POSTGRES_DB: ${POSTGRES_DB:-marketplace_db}
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
+    ports:
+      - "3000:3000"
+    networks:
+      - marketplace-network
+    volumes:
+      - ./user-app:/app
+      - /app/node_modules
+  
+  admin-api:
+    build: ./admin-panel
+    container_name: marketplace_admin_api
+    restart: always
+    depends_on:
+      - db
+      - redis
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://app_user:app_password@db:5432/marketplace_db
+    ports:
+      - "5001:5001"
+    networks:
+      - marketplace-network
+    volumes:
+      - ./admin-panel:/app
+      - /app/venv
+
+networks:
+  marketplace-network:
+    driver: bridge
+
+volumes:
+  db-data:
