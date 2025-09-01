@@ -28,14 +28,14 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Welcome to the User-Facing Marketplace API!');
 });
 
-// Example route to fetch products from the database
-app.get('/products', async (req: Request, res: Response) => {
+app.get('/api/products', async (req: Request, res: Response) => {
     try {
-        const result = await pool.query('SELECT * FROM marketplace.products;');
-        res.json(result.rows);
+        const query = 'SELECT * FROM marketplace.products'
+        const result = await pool.query(query);
+        res.json(result.rows)
     } catch (error) {
         console.error('Error fetching products:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: 'Internal Server Error' })
     }
 });
 
