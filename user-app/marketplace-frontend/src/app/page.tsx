@@ -22,7 +22,7 @@ export default async function HomePage() {
                         <ProductCard key={product.id} product={product} />
                     ))
                 ) : (
-                    <p>No products found. Please add some from the admin panel!</p>
+                    <p className="text-center text-lg col-span-full">No products found. Please add some from the admin panel!</p>
                 )}
             </div>
         </main>
