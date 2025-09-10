@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -21,12 +21,13 @@ class Product(db.Model):
     __tablename__ = 'products'
     __table_args__ = {'schema': 'marketplace'}
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullalbe=False)
+    name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     price = db.Column(db.Numeric(10, 2), nullable=False)
     image_url = db.Column(db.String(255))
     category_id = db.Column(db.Integer, db.ForeignKey('marketplace.categories.id', ondelete='SET NULL'))
-    stock = db.Column(db.Integer, nullable=False, defaulth=0)
+    stock = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 # API Routes
 @app.route('/api/products', methods=['POST'])
@@ -35,7 +36,7 @@ def add_product():
     if not all(key in data for key in ['name', 'price', 'categories_id', 'stock']):
         return jsonify({"error": "Missing required fields"}), 400
 
-    new_product = product(
+    new_product = Product(
         name=data['name'],
         description=data.get('description'),
         price=data['price'],
@@ -69,7 +70,7 @@ def delete_product(id):
 
 
 @app.route('/api/products', methods=['GET'])
-def get_products():
+def get_products_api():
     products = Product.query.all()
     output = []
     for product in products:
@@ -84,6 +85,9 @@ def get_products():
         })
     return jsonify({"products": output})
 
+@app.route('/')
+def admin_dashboard():
+    return render_template('index.html')
 
 # Main entry point
 if __name__ == '__main__':

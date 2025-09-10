@@ -1,0 +1,5 @@
+/* admin-panel/templates/static/css/style.css */
+/* Add any custom CSS here if needed, Tailwind handles most of it */
+body {
+    min-height: 100vh;
+}
